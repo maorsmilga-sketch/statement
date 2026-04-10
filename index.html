@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>הצהרה חתומה - הסניף הדיגיטלי</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  </head>
+  <body class="min-h-screen bg-slate-100 text-slate-900">
+    <main class="mx-auto max-w-3xl px-4 py-10">
+      <section class="rounded-2xl bg-white p-6 shadow-lg sm:p-8">
+        <h1 class="mb-2 text-center text-3xl font-bold text-slate-800">יצירת הצהרה חתומה (PDF)</h1>
+        <p class="mb-8 text-center text-sm text-slate-500">
+          מלאו את הפרטים, חתמו בתיבה ולחצו על "Generate PDF".
+        </p>
+
+        <form id="declarationForm" class="space-y-5">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="mb-1 block text-sm font-medium text-slate-700">שם פרטי</span>
+              <input
+                id="firstName"
+                type="text"
+                required
+                class="w-full rounded-xl border border-slate-300 px-3 py-2 outline-none ring-blue-500 transition focus:ring-2"
+                placeholder="לדוגמה: יוסי"
+              />
+            </label>
+
+            <label class="block">
+              <span class="mb-1 block text-sm font-medium text-slate-700">שם משפחה</span>
+              <input
+                id="lastName"
+                type="text"
+                required
+                class="w-full rounded-xl border border-slate-300 px-3 py-2 outline-none ring-blue-500 transition focus:ring-2"
+                placeholder="לדוגמה: כהן"
+              />
+            </label>
+
+            <label class="block">
+              <span class="mb-1 block text-sm font-medium text-slate-700">תעודת זהות</span>
+              <input
+                id="idNumber"
+                type="text"
+                required
+                class="w-full rounded-xl border border-slate-300 px-3 py-2 outline-none ring-blue-500 transition focus:ring-2"
+                placeholder="123456789"
+              />
+            </label>
+
+            <label class="block">
+              <span class="mb-1 block text-sm font-medium text-slate-700">טלפון</span>
+              <input
+                id="phone"
+                type="tel"
+                required
+                class="w-full rounded-xl border border-slate-300 px-3 py-2 outline-none ring-blue-500 transition focus:ring-2"
+                placeholder="050-1234567"
+              />
+            </label>
+
+            <label class="block sm:col-span-2">
+              <span class="mb-1 block text-sm font-medium text-slate-700">סכום (ש"ח)</span>
+              <input
+                id="amount"
+                type="number"
+                min="0"
+                step="0.01"
+                required
+                class="w-full rounded-xl border border-slate-300 px-3 py-2 outline-none ring-blue-500 transition focus:ring-2"
+                placeholder="1000"
+              />
+            </label>
+          </div>
+
+          <div>
+            <div class="mb-2 flex items-center justify-between">
+              <span class="text-sm font-medium text-slate-700">חתימה דיגיטלית</span>
+              <button
+                id="clearSignatureBtn"
+                type="button"
+                class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-100"
+              >
+                נקה חתימה
+              </button>
+            </div>
+            <div class="rounded-xl border border-slate-300 bg-white p-2">
+              <canvas id="signatureCanvas" class="h-52 w-full rounded-lg bg-slate-50"></canvas>
+            </div>
+          </div>
+
+          <button
+            id="generatePdfBtn"
+            type="submit"
+            class="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700"
+          >
+            Generate PDF
+          </button>
+        </form>
+      </section>
+    </main>
+
+    <script>
+      const { jsPDF } = window.jspdf;
+
+      const form = document.getElementById("declarationForm");
+      const canvas = document.getElementById("signatureCanvas");
+      const clearSignatureBtn = document.getElementById("clearSignatureBtn");
+
+      let signaturePad;
+
+      function resizeCanvas() {
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        const { offsetWidth, offsetHeight } = canvas;
+        canvas.width = offsetWidth * ratio;
+        canvas.height = offsetHeight * ratio;
+        canvas.getContext("2d").scale(ratio, ratio);
+        if (signaturePad) signaturePad.clear();
+      }
+
+      function toBase64(arrayBuffer) {
+        let binary = "";
+        const bytes = new Uint8Array(arrayBuffer);
+        const chunkSize = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          const chunk = bytes.subarray(i, i + chunkSize);
+          binary += String.fromCharCode.apply(null, chunk);
+        }
+        return btoa(binary);
+      }
+
+      async function loadHebrewFont(doc) {
+        // Assistant font supports Hebrew well and is loaded dynamically.
+        const fontUrl =
+          "https://github.com/google/fonts/raw/main/ofl/assistant/Assistant-Regular.ttf";
+        const response = await fetch(fontUrl);
+        if (!response.ok) throw new Error("Failed to load Hebrew font.");
+        const fontArrayBuffer = await response.arrayBuffer();
+        const fontBase64 = toBase64(fontArrayBuffer);
+        doc.addFileToVFS("Assistant-Regular.ttf", fontBase64);
+        doc.addFont("Assistant-Regular.ttf", "Assistant", "normal");
+        doc.setFont("Assistant", "normal");
+      }
+
+      function getCurrentHebrewMonth() {
+        return new Intl.DateTimeFormat("he-IL", { month: "long" }).format(new Date());
+      }
+
+      function rtlWrap(text) {
+        // Force RTL directional rendering for mixed Hebrew + numbers in PDF.
+        return `\u202B${text}\u202C`;
+      }
+
+      function drawLogoPlaceholders(doc, pageWidth) {
+        const logoW = 35;
+        const logoH = 18;
+        const topY = 10;
+        const margin = 14;
+
+        doc.setDrawColor(120, 120, 120);
+        doc.rect(margin, topY, logoW, logoH);
+        doc.rect(pageWidth - margin - logoW, topY, logoW, logoH);
+
+        doc.setFontSize(10);
+        doc.text("LOGO", margin + logoW / 2, topY + logoH / 2 + 1, { align: "center" });
+        doc.text("LOGO", pageWidth - margin - logoW / 2, topY + logoH / 2 + 1, {
+          align: "center",
+        });
+      }
+
+      window.addEventListener("load", () => {
+        signaturePad = new SignaturePad(canvas, {
+          minWidth: 0.8,
+          maxWidth: 2.2,
+          penColor: "#111827",
+        });
+        resizeCanvas();
+      });
+
+      window.addEventListener("resize", resizeCanvas);
+
+      clearSignatureBtn.addEventListener("click", () => signaturePad.clear());
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        if (signaturePad.isEmpty()) {
+          alert("נא לחתום לפני יצירת ה-PDF.");
+          return;
+        }
+
+        const firstName = document.getElementById("firstName").value.trim();
+        const lastName = document.getElementById("lastName").value.trim();
+        const idNumber = document.getElementById("idNumber").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const amount = Number(document.getElementById("amount").value);
+
+        const amountFormatted = new Intl.NumberFormat("he-IL", {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2,
+        }).format(amount);
+
+        const now = new Date();
+        const monthName = getCurrentHebrewMonth();
+        const signDateTime = new Intl.DateTimeFormat("he-IL", {
+          dateStyle: "short",
+          timeStyle: "medium",
+        }).format(now);
+
+        const declarationText = `אני ${firstName} ו${lastName} מצהיר שקיבלתי סכום של ${amountFormatted} ש"ח במהלך חודש ${monthName} מטעם הסניף הדיגיטלי כהטבה ללקוחות האקדמיה`;
+
+        const doc = new jsPDF({ unit: "mm", format: "a4" });
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const rightMargin = 18;
+
+        try {
+          await loadHebrewFont(doc);
+        } catch (err) {
+          console.warn(err);
+          alert("לא ניתן לטעון פונט עברי כרגע. נסו שוב עם חיבור לאינטרנט.");
+          return;
+        }
+
+        drawLogoPlaceholders(doc, pageWidth);
+
+        doc.setFontSize(28);
+        doc.text(rtlWrap("הסניף הדיגיטלי"), pageWidth / 2, 45, { align: "center" });
+
+        doc.setFontSize(14);
+        doc.text(rtlWrap(`שם מלא: ${firstName} ${lastName}`), pageWidth - rightMargin, 62, {
+          align: "right",
+        });
+        doc.text(rtlWrap(`תעודת זהות: ${idNumber}`), pageWidth - rightMargin, 70, {
+          align: "right",
+        });
+        doc.text(rtlWrap(`טלפון: ${phone}`), pageWidth - rightMargin, 78, {
+          align: "right",
+        });
+
+        doc.setFontSize(16);
+        doc.text(rtlWrap(declarationText), pageWidth - rightMargin, 100, {
+          align: "right",
+          maxWidth: pageWidth - rightMargin * 2,
+        });
+
+        const signatureDataUrl = signaturePad.toDataURL("image/png");
+        const sigW = 70;
+        const sigH = 30;
+        const sigX = pageWidth - rightMargin - sigW;
+        const sigY = pageHeight - 60;
+
+        doc.setFontSize(12);
+        doc.text(rtlWrap("חתימה דיגיטלית:"), pageWidth - rightMargin, sigY - 4, { align: "right" });
+        doc.addImage(signatureDataUrl, "PNG", sigX, sigY, sigW, sigH);
+
+        doc.text(rtlWrap(`תאריך ושעת חתימה: ${signDateTime}`), pageWidth - rightMargin, pageHeight - 18, {
+          align: "right",
+        });
+
+        doc.save(`declaration-${idNumber || "signed"}.pdf`);
+      });
+    </script>
+  </body>
+</html>
