@@ -248,7 +248,12 @@
         return cnv.toDataURL("image/png");
       }
 
-      function drawLogos(doc, pageWidth, topY, sideMargin, logoW, logoH) {
+      function formatPdfDateOnly(d) {
+        const pad = (n) => String(n).padStart(2, "0");
+        return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+      }
+
+      function drawLogos(doc, pageWidth, topY, sideMargin, logoW, logoH, compactDateStr) {
         const leftX = sideMargin;
         const rightX = pageWidth - sideMargin - logoW;
         const logoImage = document.getElementById("logoImage");
@@ -257,25 +262,34 @@
           const logoDataUrl = imageToDataUrl(logoImage);
           doc.addImage(logoDataUrl, "PNG", leftX, topY, logoW, logoH);
           doc.addImage(logoDataUrl, "PNG", rightX, topY, logoW, logoH);
-          return;
+        } else {
+          doc.setDrawColor(120, 120, 120);
+          doc.rect(leftX, topY, logoW, logoH);
+          doc.rect(rightX, topY, logoW, logoH);
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(10);
+          doc.text("LOGO", leftX + logoW / 2, topY + logoH / 2 + 1, { align: "center" });
+          doc.text("LOGO", rightX + logoW / 2, topY + logoH / 2 + 1, { align: "center" });
         }
 
-        doc.setDrawColor(120, 120, 120);
-        doc.rect(leftX, topY, logoW, logoH);
-        doc.rect(rightX, topY, logoW, logoH);
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
-        doc.text("LOGO", leftX + logoW / 2, topY + logoH / 2 + 1, { align: "center" });
-        doc.text("LOGO", rightX + logoW / 2, topY + logoH / 2 + 1, { align: "center" });
+        if (compactDateStr) {
+          doc.setTextColor(0, 0, 0);
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(8);
+          // Latin date must not use jsPDF R2L (would show e.g. 6202/40/01 instead of 10/04/2026).
+          setDocumentRtl(doc, false);
+          doc.text(compactDateStr, pageWidth / 2, topY + logoH / 2 + 1.2, { align: "center" });
+          setDocumentRtl(doc, true);
+        }
       }
 
       window.addEventListener("load", () => {
         topDate.textContent = getTodayLabel();
         restoreFormData();
         signaturePad = new SignaturePad(canvas, {
-          minWidth: 0.8,
-          maxWidth: 2.2,
-          penColor: "#111827",
+          minWidth: 1.4,
+          maxWidth: 3.8,
+          penColor: "#000000",
         });
         resizeCanvas();
         for (const id of persistedFieldIds) {
@@ -289,7 +303,27 @@
 
       function formatSigningStamp(d) {
         const pad = (n) => String(n).padStart(2, "0");
-        return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        const stamp = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        const LRE = "\u202A";
+        const PDF = "\u202C";
+        return `${LRE}${stamp}${PDF}`;
+      }
+
+      function sanitizeFileNamePart(str) {
+        return String(str || "")
+          .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      function buildDeclarationFileName(firstName, lastName, amountStr, d) {
+        const pad = (n) => String(n).padStart(2, "0");
+        const dateOnly = `${pad(d.getDate())}-${pad(d.getMonth() + 1)}-${d.getFullYear()}`;
+        const fn = sanitizeFileNamePart(firstName) || "שם_פרטי";
+        const ln = sanitizeFileNamePart(lastName) || "שם_משפחה";
+        const amt = sanitizeFileNamePart(amountStr) || "סכום";
+        const gershayim = "\u05F4";
+        return `הצהרת הוצאה ${fn} ${ln} סך ש${gershayim}ח ${amt} ${dateOnly}.pdf`;
       }
 
       function downloadBlob(blob, fileName) {
@@ -439,7 +473,7 @@
 
         const now = new Date();
         const currentMonth = getCurrentHebrewMonth();
-        const documentDate = new Intl.DateTimeFormat("he-IL", { dateStyle: "full" }).format(now);
+        const compactPdfDate = formatPdfDateOnly(now);
         const signingStamp = formatSigningStamp(now);
 
         const gershayim = "\u05F4";
@@ -475,13 +509,11 @@
         }
 
         setDocumentRtl(doc, true);
-        drawLogos(doc, pageWidth, logoTopY, sideMargin, logoW, logoH);
+        drawLogos(doc, pageWidth, logoTopY, sideMargin, logoW, logoH, compactPdfDate);
         setHebrewPdfFont(doc, "normal", isHebrewFontLoaded);
+        doc.setTextColor(0, 0, 0);
 
-        let y = logoTopY + logoH + 12;
-        doc.setFontSize(10);
-        doc.text(`תאריך הפקה: ${documentDate}`, pageWidth - sideMargin, y, { align: "right" });
-        y += 9;
+        let y = logoTopY + logoH + 10;
 
         setHebrewPdfFont(doc, "bold", isHebrewFontLoaded);
         doc.setFontSize(36);
@@ -547,7 +579,8 @@
         const sigY = yBlock + footerPng.heightMm + 5;
         doc.addImage(signatureDataUrl, "PNG", sigX, sigY, sigW, sigH);
 
-        const fileName = `declaration-${idNumber || "signed"}.pdf`;
+        const amountInputStr = document.getElementById("amount").value.trim();
+        const fileName = buildDeclarationFileName(firstName, lastName, amountInputStr, now);
 
         try {
           const pdfBlob = doc.output("blob");
