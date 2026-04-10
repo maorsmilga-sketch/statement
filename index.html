@@ -3,101 +3,129 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>הצהרה חתומה - הסניף הדיגיטלי</title>
+    <title>הסניף הדיגיטלי</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              app: ["Assistant", "Arial", "sans-serif"],
+            },
+            boxShadow: {
+              card: "0 8px 24px rgba(15, 23, 42, 0.08)",
+            },
+          },
+        },
+      };
+    </script>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap"
+    />
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   </head>
-  <body class="min-h-screen bg-slate-100 text-slate-900">
-    <main class="mx-auto max-w-3xl px-4 py-10">
-      <section class="rounded-2xl bg-white p-6 shadow-lg sm:p-8">
-        <h1 class="mb-2 text-center text-3xl font-bold text-slate-800">יצירת הצהרה חתומה (PDF)</h1>
-        <p class="mb-8 text-center text-sm text-slate-500">
-          מלאו את הפרטים, חתמו בתיבה ולחצו על "Generate PDF".
+  <body class="min-h-screen bg-gradient-to-br from-emerald-800 via-green-700 to-teal-800 text-slate-900 font-app">
+    <main class="mx-auto max-w-3xl px-3 py-3 sm:px-4 sm:py-8">
+      <section class="relative rounded-2xl border border-white/20 bg-white/95 px-3 pb-4 pt-2 shadow-xl shadow-emerald-950/25 backdrop-blur-sm sm:px-8 sm:pb-8 sm:pt-4">
+        <div class="mb-3 flex items-center justify-between gap-3 sm:mb-4">
+          <img src="logo1.png" alt="לוגו" class="h-11 w-auto max-w-[42%] object-contain sm:h-14" />
+          <img src="logo1.png" alt="לוגו" class="h-11 w-auto max-w-[42%] object-contain sm:h-14" />
+        </div>
+        <div class="mb-3 flex items-center justify-between rounded-lg bg-emerald-50/90 px-3 py-1.5 text-xs text-emerald-900 sm:mb-4 sm:px-4 sm:py-2 sm:text-sm">
+          <span class="font-semibold text-emerald-800">תאריך</span>
+          <span id="topDate" class="text-end leading-tight"></span>
+        </div>
+        <h1 class="mb-1 text-center text-xl font-extrabold text-emerald-900 sm:mb-2 sm:text-3xl">הסניף הדיגיטלי</h1>
+        <p class="mb-3 text-center text-xs text-emerald-800/85 sm:mb-4 sm:text-sm">
+          לקבלת ההטבה, מלאו פרטים ולחצו על הפק
         </p>
+        <p id="statusMessage" class="mb-5 hidden whitespace-pre-line rounded-lg px-3 py-2 text-sm sm:mb-8"></p>
+        <img id="logoImage" src="logo1.png" alt="" class="sr-only" />
 
-        <form id="declarationForm" class="space-y-5">
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <form id="declarationForm" class="space-y-3 sm:space-y-5">
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             <label class="block">
-              <span class="mb-1 block text-sm font-medium text-slate-700">שם פרטי</span>
+              <span class="mb-0.5 block text-xs font-semibold text-emerald-900 sm:text-sm">שם פרטי</span>
               <input
                 id="firstName"
                 type="text"
                 required
-                class="w-full rounded-xl border border-slate-300 px-3 py-2 outline-none ring-blue-500 transition focus:ring-2"
+                class="w-full rounded-lg border border-emerald-200 bg-emerald-50/50 px-2.5 py-1.5 text-sm outline-none ring-emerald-500/40 transition focus:border-emerald-500 focus:bg-white focus:ring-2 sm:px-3 sm:py-2"
                 placeholder="לדוגמה: יוסי"
               />
             </label>
 
             <label class="block">
-              <span class="mb-1 block text-sm font-medium text-slate-700">שם משפחה</span>
+              <span class="mb-0.5 block text-xs font-semibold text-emerald-900 sm:text-sm">שם משפחה</span>
               <input
                 id="lastName"
                 type="text"
                 required
-                class="w-full rounded-xl border border-slate-300 px-3 py-2 outline-none ring-blue-500 transition focus:ring-2"
+                class="w-full rounded-lg border border-emerald-200 bg-emerald-50/50 px-2.5 py-1.5 text-sm outline-none ring-emerald-500/40 transition focus:border-emerald-500 focus:bg-white focus:ring-2 sm:px-3 sm:py-2"
                 placeholder="לדוגמה: כהן"
               />
             </label>
 
             <label class="block">
-              <span class="mb-1 block text-sm font-medium text-slate-700">תעודת זהות</span>
+              <span class="mb-0.5 block text-xs font-semibold text-emerald-900 sm:text-sm">תעודת זהות</span>
               <input
                 id="idNumber"
                 type="text"
                 required
-                class="w-full rounded-xl border border-slate-300 px-3 py-2 outline-none ring-blue-500 transition focus:ring-2"
+                class="w-full rounded-lg border border-emerald-200 bg-emerald-50/50 px-2.5 py-1.5 text-sm outline-none ring-emerald-500/40 transition focus:border-emerald-500 focus:bg-white focus:ring-2 sm:px-3 sm:py-2"
                 placeholder="123456789"
               />
             </label>
 
             <label class="block">
-              <span class="mb-1 block text-sm font-medium text-slate-700">טלפון</span>
+              <span class="mb-0.5 block text-xs font-semibold text-emerald-900 sm:text-sm">טלפון</span>
               <input
                 id="phone"
                 type="tel"
                 required
-                class="w-full rounded-xl border border-slate-300 px-3 py-2 outline-none ring-blue-500 transition focus:ring-2"
+                class="w-full rounded-lg border border-emerald-200 bg-emerald-50/50 px-2.5 py-1.5 text-sm outline-none ring-emerald-500/40 transition focus:border-emerald-500 focus:bg-white focus:ring-2 sm:px-3 sm:py-2"
                 placeholder="050-1234567"
               />
             </label>
 
             <label class="block sm:col-span-2">
-              <span class="mb-1 block text-sm font-medium text-slate-700">סכום (ש"ח)</span>
+              <span class="mb-0.5 block text-xs font-semibold text-emerald-900 sm:text-sm">סכום (ש"ח)</span>
               <input
                 id="amount"
                 type="number"
                 min="0"
                 step="0.01"
                 required
-                class="w-full rounded-xl border border-slate-300 px-3 py-2 outline-none ring-blue-500 transition focus:ring-2"
+                class="w-full rounded-lg border border-emerald-200 bg-emerald-50/50 px-2.5 py-1.5 text-sm outline-none ring-emerald-500/40 transition focus:border-emerald-500 focus:bg-white focus:ring-2 sm:px-3 sm:py-2"
                 placeholder="1000"
               />
             </label>
           </div>
 
           <div>
-            <div class="mb-2 flex items-center justify-between">
-              <span class="text-sm font-medium text-slate-700">חתימה דיגיטלית</span>
+            <div class="mb-1.5 flex items-center justify-between sm:mb-2">
+              <span class="text-xs font-semibold text-emerald-900 sm:text-sm">חתימה דיגיטלית</span>
               <button
                 id="clearSignatureBtn"
                 type="button"
-                class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-600 transition hover:bg-slate-100"
+                class="rounded-md border border-emerald-200 bg-emerald-50/80 px-2 py-1 text-[11px] font-medium text-emerald-800 transition hover:bg-emerald-100 sm:px-3 sm:py-1.5 sm:text-xs"
               >
                 נקה חתימה
               </button>
             </div>
-            <div class="rounded-xl border border-slate-300 bg-white p-2">
-              <canvas id="signatureCanvas" class="h-52 w-full rounded-lg bg-slate-50"></canvas>
+            <div class="rounded-lg border border-emerald-200 bg-white p-1.5 sm:rounded-xl sm:p-2">
+              <canvas id="signatureCanvas" class="h-36 w-full rounded-md bg-emerald-50/40 sm:h-44 md:h-52"></canvas>
             </div>
           </div>
 
           <button
             id="generatePdfBtn"
             type="submit"
-            class="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700"
+            class="w-full rounded-lg bg-gradient-to-l from-emerald-600 to-green-600 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-emerald-900/20 transition hover:from-emerald-700 hover:to-green-700 active:scale-[0.99] sm:rounded-xl sm:py-3 sm:text-base"
           >
-            Generate PDF
+            הפק
           </button>
         </form>
       </section>
@@ -109,6 +137,10 @@
       const form = document.getElementById("declarationForm");
       const canvas = document.getElementById("signatureCanvas");
       const clearSignatureBtn = document.getElementById("clearSignatureBtn");
+      const statusMessage = document.getElementById("statusMessage");
+      const topDate = document.getElementById("topDate");
+      const STORAGE_KEY = "declarationFormCacheV1";
+      const persistedFieldIds = ["firstName", "lastName", "idNumber", "phone"];
 
       let signaturePad;
 
@@ -132,71 +164,273 @@
         return btoa(binary);
       }
 
-      async function loadHebrewFont(doc) {
-        // Assistant font supports Hebrew well and is loaded dynamically.
-        const fontUrl =
-          "https://github.com/google/fonts/raw/main/ofl/assistant/Assistant-Regular.ttf";
-        const response = await fetch(fontUrl);
-        if (!response.ok) throw new Error("Failed to load Hebrew font.");
-        const fontArrayBuffer = await response.arrayBuffer();
-        const fontBase64 = toBase64(fontArrayBuffer);
-        doc.addFileToVFS("Assistant-Regular.ttf", fontBase64);
-        doc.addFont("Assistant-Regular.ttf", "Assistant", "normal");
-        doc.setFont("Assistant", "normal");
+      async function loadHebrewFonts(doc) {
+        const regularUrl = "./NotoSansHebrew-Regular.ttf";
+        const boldUrl = "./NotoSansHebrew-Bold.ttf";
+        const [regRes, boldRes] = await Promise.all([fetch(regularUrl), fetch(boldUrl)]);
+        if (!regRes.ok || !boldRes.ok) throw new Error("Failed to load Hebrew fonts.");
+        const regBuf = await regRes.arrayBuffer();
+        const boldBuf = await boldRes.arrayBuffer();
+        doc.addFileToVFS("NotoSansHebrew-Regular.ttf", toBase64(regBuf));
+        doc.addFileToVFS("NotoSansHebrew-Bold.ttf", toBase64(boldBuf));
+        doc.addFont("NotoSansHebrew-Regular.ttf", "NotoSansHebrew", "normal");
+        doc.addFont("NotoSansHebrew-Bold.ttf", "NotoSansHebrew", "bold");
+        doc.setFont("NotoSansHebrew", "normal");
+      }
+
+      function setDocumentRtl(doc, enabled) {
+        if (typeof doc.setRTL === "function") {
+          doc.setRTL(enabled);
+        } else {
+          doc.setR2L(enabled);
+        }
+      }
+
+      function setHebrewPdfFont(doc, style, hebrewReady) {
+        if (hebrewReady) {
+          doc.setFont("NotoSansHebrew", style);
+        } else {
+          doc.setFont("helvetica", style === "bold" ? "bold" : "normal");
+        }
       }
 
       function getCurrentHebrewMonth() {
         return new Intl.DateTimeFormat("he-IL", { month: "long" }).format(new Date());
       }
 
-      function rtlWrap(text) {
-        // Force RTL directional rendering for mixed Hebrew + numbers in PDF.
-        return `\u202B${text}\u202C`;
+      function setStatus(message, type = "info") {
+        statusMessage.classList.remove("hidden", "bg-red-50", "text-red-700", "bg-emerald-50", "text-emerald-700", "bg-slate-100", "text-slate-700");
+        if (type === "error") {
+          statusMessage.classList.add("bg-red-50", "text-red-700");
+        } else if (type === "success") {
+          statusMessage.classList.add("bg-emerald-50", "text-emerald-700");
+        } else {
+          statusMessage.classList.add("bg-slate-100", "text-slate-700");
+        }
+        statusMessage.textContent = message;
       }
 
-      function drawLogoPlaceholders(doc, pageWidth) {
-        const logoW = 35;
-        const logoH = 18;
-        const topY = 10;
-        const margin = 14;
+      function getTodayLabel() {
+        return new Intl.DateTimeFormat("he-IL", {
+          dateStyle: "full",
+        }).format(new Date());
+      }
+
+      function cacheFormData() {
+        const data = {};
+        for (const id of persistedFieldIds) {
+          data[id] = document.getElementById(id).value;
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }
+
+      function restoreFormData() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        try {
+          const parsed = JSON.parse(raw);
+          for (const id of persistedFieldIds) {
+            if (typeof parsed[id] === "string") {
+              document.getElementById(id).value = parsed[id];
+            }
+          }
+        } catch (err) {
+          console.warn("Failed to parse cached form data.", err);
+        }
+      }
+
+      function imageToDataUrl(imgEl) {
+        const cnv = document.createElement("canvas");
+        cnv.width = imgEl.naturalWidth;
+        cnv.height = imgEl.naturalHeight;
+        const ctx = cnv.getContext("2d");
+        ctx.drawImage(imgEl, 0, 0);
+        return cnv.toDataURL("image/png");
+      }
+
+      function drawLogos(doc, pageWidth, topY, sideMargin, logoW, logoH) {
+        const leftX = sideMargin;
+        const rightX = pageWidth - sideMargin - logoW;
+        const logoImage = document.getElementById("logoImage");
+
+        if (logoImage && logoImage.complete && logoImage.naturalWidth > 0) {
+          const logoDataUrl = imageToDataUrl(logoImage);
+          doc.addImage(logoDataUrl, "PNG", leftX, topY, logoW, logoH);
+          doc.addImage(logoDataUrl, "PNG", rightX, topY, logoW, logoH);
+          return;
+        }
 
         doc.setDrawColor(120, 120, 120);
-        doc.rect(margin, topY, logoW, logoH);
-        doc.rect(pageWidth - margin - logoW, topY, logoW, logoH);
-
+        doc.rect(leftX, topY, logoW, logoH);
+        doc.rect(rightX, topY, logoW, logoH);
+        doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
-        doc.text("LOGO", margin + logoW / 2, topY + logoH / 2 + 1, { align: "center" });
-        doc.text("LOGO", pageWidth - margin - logoW / 2, topY + logoH / 2 + 1, {
-          align: "center",
-        });
+        doc.text("LOGO", leftX + logoW / 2, topY + logoH / 2 + 1, { align: "center" });
+        doc.text("LOGO", rightX + logoW / 2, topY + logoH / 2 + 1, { align: "center" });
       }
 
       window.addEventListener("load", () => {
+        topDate.textContent = getTodayLabel();
+        restoreFormData();
         signaturePad = new SignaturePad(canvas, {
           minWidth: 0.8,
           maxWidth: 2.2,
           penColor: "#111827",
         });
         resizeCanvas();
+        for (const id of persistedFieldIds) {
+          document.getElementById(id).addEventListener("input", cacheFormData);
+        }
       });
 
       window.addEventListener("resize", resizeCanvas);
 
       clearSignatureBtn.addEventListener("click", () => signaturePad.clear());
 
-      form.addEventListener("submit", async (event) => {
-        event.preventDefault();
+      function formatSigningStamp(d) {
+        const pad = (n) => String(n).padStart(2, "0");
+        return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      }
 
-        if (signaturePad.isEmpty()) {
-          alert("נא לחתום לפני יצירת ה-PDF.");
-          return;
+      function downloadBlob(blob, fileName) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        a.rel = "noopener";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      const MM_TO_PX = 96 / 25.4;
+      const PT_TO_PX = 96 / 72;
+
+      /**
+       * Renders Hebrew paragraph using the browser's RTL engine (avoids jsPDF splitTextToSize / R2L bugs).
+       * Returns PNG data URL and height in mm for placement in jsPDF.
+       */
+      function wrapLogicalLinesToFitWidth(ctx, text, maxInnerWidthPx) {
+        const words = text.split(/\s+/).filter(Boolean);
+        const lines = [];
+        let line = "";
+        for (const w of words) {
+          const trial = line ? `${line} ${w}` : w;
+          if (ctx.measureText(trial).width <= maxInnerWidthPx) {
+            line = trial;
+          } else {
+            if (line) lines.push(line);
+            if (ctx.measureText(w).width <= maxInnerWidthPx) {
+              line = w;
+            } else {
+              let acc = "";
+              for (const ch of w) {
+                const t2 = acc + ch;
+                if (ctx.measureText(t2).width <= maxInnerWidthPx) {
+                  acc = t2;
+                } else {
+                  if (acc) lines.push(acc);
+                  acc = ch;
+                }
+              }
+              line = acc;
+            }
+          }
         }
+        if (line) lines.push(line);
+        return lines;
+      }
 
+      function renderHebrewParagraphPngChunks(fullText, widthMm, fontSizePt, lineHeightFactor, maxHeightMm) {
+        const padPx = 6;
+        const fontSizePx = fontSizePt * PT_TO_PX;
+        const lineHeightPx = fontSizePx * lineHeightFactor;
+        const widthPx = widthMm * MM_TO_PX;
+        const innerW = Math.max(40, widthPx - padPx * 2);
+        const maxHeightPx = maxHeightMm > 0 ? maxHeightMm * MM_TO_PX : 1e6;
+
+        const dpr = Math.min(2, (window.devicePixelRatio || 1));
+        const c = document.createElement("canvas");
+        const ctx = c.getContext("2d");
+        ctx.font = `${fontSizePx}px "Assistant", "Segoe UI", "Arial", sans-serif`;
+        ctx.direction = "rtl";
+        const allLines = wrapLogicalLinesToFitWidth(ctx, fullText, innerW);
+
+        const chunks = [];
+        let batch = [];
+        let batchH = 0;
+
+        const flush = () => {
+          if (!batch.length) return;
+          const hPx = batchH + padPx * 2;
+          const hMm = hPx / MM_TO_PX;
+          c.width = Math.ceil(widthPx * dpr);
+          c.height = Math.ceil(hPx * dpr);
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, widthPx, hPx);
+          ctx.fillStyle = "#0f172a";
+          ctx.font = `${fontSizePx}px "Assistant", "Segoe UI", "Arial", sans-serif`;
+          ctx.textAlign = "right";
+          ctx.textBaseline = "top";
+          ctx.direction = "rtl";
+          let y = padPx;
+          for (const ln of batch) {
+            ctx.fillText(ln, widthPx - padPx, y);
+            y += lineHeightPx;
+          }
+          chunks.push({ dataUrl: c.toDataURL("image/png"), heightMm: hMm });
+          batch = [];
+          batchH = 0;
+        };
+
+        for (const ln of allLines) {
+          if (batch.length && batchH + lineHeightPx + padPx * 2 > maxHeightPx) {
+            flush();
+          }
+          batch.push(ln);
+          batchH += lineHeightPx;
+        }
+        flush();
+        return chunks;
+      }
+
+      function renderFooterLabelsPng(dateLine, labelLine, widthMm) {
+        const padPx = 4;
+        const widthPx = widthMm * MM_TO_PX;
+        const datePx = 10 * PT_TO_PX;
+        const labelPx = 11 * PT_TO_PX;
+        const lineGap = 3;
+        const hPx = padPx * 2 + datePx + lineGap + labelPx;
+        const dpr = Math.min(2, window.devicePixelRatio || 1);
+        const c = document.createElement("canvas");
+        c.width = Math.ceil(widthPx * dpr);
+        c.height = Math.ceil(hPx * dpr);
+        const ctx = c.getContext("2d");
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, widthPx, hPx);
+        ctx.fillStyle = "#0f172a";
+        ctx.textAlign = "right";
+        ctx.textBaseline = "top";
+        ctx.direction = "rtl";
+        let y = padPx;
+        ctx.font = `${datePx}px "Assistant", "Segoe UI", "Arial", sans-serif`;
+        ctx.fillText(dateLine, widthPx - padPx, y);
+        y += datePx + lineGap;
+        ctx.font = `${labelPx}px "Assistant", "Segoe UI", "Arial", sans-serif`;
+        ctx.fillText(labelLine, widthPx - padPx, y);
+        return { dataUrl: c.toDataURL("image/png"), heightMm: hPx / MM_TO_PX };
+      }
+
+      async function generatePdf() {
         const firstName = document.getElementById("firstName").value.trim();
         const lastName = document.getElementById("lastName").value.trim();
         const idNumber = document.getElementById("idNumber").value.trim();
         const phone = document.getElementById("phone").value.trim();
-        const amount = Number(document.getElementById("amount").value);
+        const amountRaw = document.getElementById("amount").value;
+        const amount = Number(amountRaw);
 
         const amountFormatted = new Intl.NumberFormat("he-IL", {
           minimumFractionDigits: 0,
@@ -204,64 +438,141 @@
         }).format(amount);
 
         const now = new Date();
-        const monthName = getCurrentHebrewMonth();
-        const signDateTime = new Intl.DateTimeFormat("he-IL", {
-          dateStyle: "short",
-          timeStyle: "medium",
-        }).format(now);
+        const currentMonth = getCurrentHebrewMonth();
+        const documentDate = new Intl.DateTimeFormat("he-IL", { dateStyle: "full" }).format(now);
+        const signingStamp = formatSigningStamp(now);
 
-        const declarationText = `אני ${firstName} ו${lastName} מצהיר שקיבלתי סכום של ${amountFormatted} ש"ח במהלך חודש ${monthName} מטעם הסניף הדיגיטלי כהטבה ללקוחות האקדמיה`;
+        const gershayim = "\u05F4";
+        const fullText = `אני ${firstName} ${lastName}, ת.ז ${idNumber}, טלפון ${phone}, מצהיר שקיבלתי סכום של ${amountFormatted} ש${gershayim}ח במהלך חודש ${currentMonth} מטעם הסניף הדיגיטלי כהטבה ללקוחות האקדמיה`;
+
+        if (document.fonts && document.fonts.ready) {
+          try {
+            await document.fonts.load(`16px "Assistant"`);
+            await document.fonts.ready;
+          } catch (e) {
+            /* ignore */
+          }
+        }
 
         const doc = new jsPDF({ unit: "mm", format: "a4" });
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
-        const rightMargin = 18;
+        const sideMargin = 26;
+        const topMargin = 16;
+        const textColumnWidth = pageWidth - sideMargin * 2;
+        const maxTextWidth = textColumnWidth - 4;
+        const logoW = 32;
+        const logoH = 16;
+        const logoTopY = topMargin;
+
+        let isHebrewFontLoaded = false;
+        try {
+          await loadHebrewFonts(doc);
+          isHebrewFontLoaded = true;
+        } catch (err) {
+          console.warn("Hebrew font load failed, using fallback font.", err);
+          doc.setFont("helvetica", "normal");
+        }
+
+        setDocumentRtl(doc, true);
+        drawLogos(doc, pageWidth, logoTopY, sideMargin, logoW, logoH);
+        setHebrewPdfFont(doc, "normal", isHebrewFontLoaded);
+
+        let y = logoTopY + logoH + 12;
+        doc.setFontSize(10);
+        doc.text(`תאריך הפקה: ${documentDate}`, pageWidth - sideMargin, y, { align: "right" });
+        y += 9;
+
+        setHebrewPdfFont(doc, "bold", isHebrewFontLoaded);
+        doc.setFontSize(36);
+        doc.text("הסניף הדיגיטלי", pageWidth / 2, y + 8, { align: "center" });
+        y += 22;
+
+        const bodyFontSize = 14;
+
+        const bottomMargin = 16;
+        const sigW = 64;
+        const sigH = 28;
+        const gapAboveSig = 10;
+        const dateLineH = 7;
+        const labelH = 6;
+        const reservedFooter =
+          bottomMargin + sigH + gapAboveSig + dateLineH + labelH + 8;
+
+        const signatureFloorY = pageHeight - reservedFooter;
+
+        let bodyCursorY = y;
+        const maxBodyHeightThisPage = Math.max(30, signatureFloorY - bodyCursorY - 6);
+        const paraChunks = renderHebrewParagraphPngChunks(
+          fullText,
+          maxTextWidth,
+          bodyFontSize,
+          1.55,
+          maxBodyHeightThisPage,
+        );
+
+        for (let c = 0; c < paraChunks.length; c++) {
+          const chunk = paraChunks[c];
+          if (bodyCursorY + chunk.heightMm > signatureFloorY - 1) {
+            doc.addPage();
+            setDocumentRtl(doc, true);
+            setHebrewPdfFont(doc, "normal", isHebrewFontLoaded);
+            bodyCursorY = sideMargin + 14;
+          }
+          doc.addImage(chunk.dataUrl, "PNG", sideMargin, bodyCursorY, maxTextWidth, chunk.heightMm);
+          bodyCursorY += chunk.heightMm + 4;
+        }
+
+        const footerPng = renderFooterLabelsPng(
+          `תאריך חתימה: ${signingStamp}`,
+          "חתימה דיגיטלית:",
+          maxTextWidth,
+        );
+        const signatureDataUrl = signaturePad.toDataURL("image/png");
+        const sigX = pageWidth - sideMargin - sigW;
+
+        const signatureBlockH = footerPng.heightMm + 5 + sigH;
+        let yBlock = bodyCursorY + gapAboveSig;
+        if (yBlock + signatureBlockH > pageHeight - bottomMargin) {
+          doc.addPage();
+          setDocumentRtl(doc, true);
+          setHebrewPdfFont(doc, "normal", isHebrewFontLoaded);
+          yBlock = sideMargin + 14;
+        }
+        if (yBlock + signatureBlockH > pageHeight - bottomMargin) {
+          yBlock = Math.max(sideMargin + 8, pageHeight - bottomMargin - signatureBlockH);
+        }
+
+        doc.addImage(footerPng.dataUrl, "PNG", sideMargin, yBlock, maxTextWidth, footerPng.heightMm);
+        const sigY = yBlock + footerPng.heightMm + 5;
+        doc.addImage(signatureDataUrl, "PNG", sigX, sigY, sigW, sigH);
+
+        const fileName = `declaration-${idNumber || "signed"}.pdf`;
 
         try {
-          await loadHebrewFont(doc);
+          const pdfBlob = doc.output("blob");
+          downloadBlob(pdfBlob, fileName);
+          if (isHebrewFontLoaded) {
+            setStatus("הקובץ הורד למחשב בהצלחה.", "success");
+          } else {
+            setStatus("הקובץ הורד למחשב. שימו לב: הפונט העברי ב־PDF לא נטען במלואו.", "info");
+          }
         } catch (err) {
-          console.warn(err);
-          alert("לא ניתן לטעון פונט עברי כרגע. נסו שוב עם חיבור לאינטרנט.");
+          console.error(err);
+          setStatus("נכשלה יצירת PDF או הורדה. פתחו את ה-Console לבדיקה.", "error");
+        }
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        setStatus("יוצר PDF...", "info");
+
+        if (signaturePad.isEmpty()) {
+          setStatus("נא לחתום לפני יצירת ה-PDF.", "error");
           return;
         }
 
-        drawLogoPlaceholders(doc, pageWidth);
-
-        doc.setFontSize(28);
-        doc.text(rtlWrap("הסניף הדיגיטלי"), pageWidth / 2, 45, { align: "center" });
-
-        doc.setFontSize(14);
-        doc.text(rtlWrap(`שם מלא: ${firstName} ${lastName}`), pageWidth - rightMargin, 62, {
-          align: "right",
-        });
-        doc.text(rtlWrap(`תעודת זהות: ${idNumber}`), pageWidth - rightMargin, 70, {
-          align: "right",
-        });
-        doc.text(rtlWrap(`טלפון: ${phone}`), pageWidth - rightMargin, 78, {
-          align: "right",
-        });
-
-        doc.setFontSize(16);
-        doc.text(rtlWrap(declarationText), pageWidth - rightMargin, 100, {
-          align: "right",
-          maxWidth: pageWidth - rightMargin * 2,
-        });
-
-        const signatureDataUrl = signaturePad.toDataURL("image/png");
-        const sigW = 70;
-        const sigH = 30;
-        const sigX = pageWidth - rightMargin - sigW;
-        const sigY = pageHeight - 60;
-
-        doc.setFontSize(12);
-        doc.text(rtlWrap("חתימה דיגיטלית:"), pageWidth - rightMargin, sigY - 4, { align: "right" });
-        doc.addImage(signatureDataUrl, "PNG", sigX, sigY, sigW, sigH);
-
-        doc.text(rtlWrap(`תאריך ושעת חתימה: ${signDateTime}`), pageWidth - rightMargin, pageHeight - 18, {
-          align: "right",
-        });
-
-        doc.save(`declaration-${idNumber || "signed"}.pdf`);
+        await generatePdf();
       });
     </script>
   </body>
