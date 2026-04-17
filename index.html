@@ -386,14 +386,12 @@
           .trim();
       }
 
-      function buildDeclarationFileName(firstName, lastName, amountStr, d) {
-        const pad = (n) => String(n).padStart(2, "0");
-        const dateOnly = `${pad(d.getDate())}-${pad(d.getMonth() + 1)}-${d.getFullYear()}`;
+      function buildDeclarationFileName(firstName, lastName, amountStr) {
         const fn = sanitizeFileNamePart(firstName) || "שם_פרטי";
         const ln = sanitizeFileNamePart(lastName) || "שם_משפחה";
         const amt = sanitizeFileNamePart(amountStr) || "סכום";
         const gershayim = "\u05F4";
-        return `הצהרת הוצאה ${fn} ${ln} סך ש${gershayim}ח ${amt} ${dateOnly}.pdf`;
+        return `הצהרת הוצאה ${fn} ${ln} סך ש${gershayim}ח ${amt}.pdf`;
       }
 
       function downloadBlob(blob, fileName) {
@@ -654,7 +652,7 @@
         doc.addImage(signatureDataUrl, "PNG", sigX, sigY, sigW, sigH);
 
         const amountInputStr = document.getElementById("amount").value.trim();
-        const fileName = buildDeclarationFileName(firstName, lastName, amountInputStr, generatedAt);
+        const fileName = buildDeclarationFileName(firstName, lastName, amountInputStr);
 
         try {
           const pdfBlob = doc.output("blob");
